@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User{
+  id Int @id @default(autoincrement())
+  clerkId String @unique
+  email String @unique
+  monitors Monitor[]
+}
+model Monitor{
+  id Int @id @default(autoincrement())
+  userId String 
+  url String 
+  name String
+  interval Int 
+  currentStatus String ?
+  createdAt DateTime @default(now())
+  history History[]
+  user User @relation(fields: [userId], references: [clerkId])
+  @@unique([userId,url])
+  @@index([userId])
+}
+model History{
+  id Int @id @default(autoincrement())
+  monitorId Int
+  lastStatus String
+  lastPing DateTime @default(now())
+  responseTime Int ?
+  monitor Monitor @relation(fields: [monitorId],references: [id])
+}
