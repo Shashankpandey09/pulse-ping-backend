@@ -2,12 +2,14 @@ import { createClient } from "redis";
 import dotenv from "dotenv";
 import nodeCron from "node-cron";
 import { enqueueForInterval } from "./utils/enqueue";
-export const schedulerClient = createClient();
+export const schedulerClient = createClient(
+  { url: 'redis://my-redis:6379' }
+);
 dotenv.config();
-const StartScheduler = async() => {
+const StartScheduler = async () => {
   //connecting client
-await schedulerClient.connect()
-console.log('client Connected')
+  await schedulerClient.connect()
+  console.log('client Connected')
   //scheduling jobs
   nodeCron.schedule("*/5 * * * *", () => {
     enqueueForInterval(5).catch((err: any) => console.log(err));

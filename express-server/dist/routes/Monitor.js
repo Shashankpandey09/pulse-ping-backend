@@ -100,24 +100,23 @@ monitorRoute.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).json({ error: `error is----> ${error}` });
     }
 }));
-monitorRoute.get("/history/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // fetching the history for a specific monitor
-        const id = Number(req.params.id);
-        const monitorHistory = yield prisma_1.prisma.history.findMany({
-            where: { monitorId: id },
-            take: 10
-        });
-        if (!monitorHistory) {
-            res.status(404).json({ message: "Not Found" });
-            return;
-        }
-        res.status(200).json({ message: monitorHistory });
-    }
-    catch (error) {
-        res.status(500).json({ message: error });
-    }
-}));
+// monitorRoute.get("/history/:id", async (req, res) => {
+//   try {
+//     // fetching the history for a specific monitor
+//     const id: number = Number(req.params.id);
+//     const monitorHistory = await prisma.history.findMany({
+//       where: { monitorId: id },
+//       take:10
+//     });
+//     if (!monitorHistory) {
+//       res.status(404).json({ message: "Not Found" });
+//       return;
+//     }
+//     res.status(200).json({ message: monitorHistory });
+//   } catch (error) {
+//     res.status(500).json({ message: error });
+//   }
+// });
 monitorRoute.delete("/delete/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = Number(req.params.id);

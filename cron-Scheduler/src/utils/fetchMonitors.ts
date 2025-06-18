@@ -26,21 +26,22 @@ export async function* fetchMonitorsByIntervals(interval: number) {
         `${process.env.EXPRESS_APP_URL}/internal/monitors`,
         options
       );
-  
+
       const { monitors, nextCursor } = res.data;
-      if (!monitors || !Array.isArray(monitors)||monitors.length === 0) {
-        console.error("❌ `monitors` is not an array. Response might be malformed Or length of monitor is 0");
+      if (!monitors || !Array.isArray(monitors) || monitors.length === 0) {
+        // console.error("❌ `monitors` is not an array. Response might be malformed Or length of monitor is 0");
+        console.log('breaking');
         break;
       }
-     console.log(monitors,'this is first monitor',nextCursor)
+      console.log(monitors, 'this is first monitor', nextCursor)
       for (const mon of monitors) yield JSON.stringify(mon);
-         if (!nextCursor) {
+      if (!nextCursor) {
         console.log("✅ No nextCursor. All data fetched.");
         break;
       }
       cursor = nextCursor;
     } catch (error) {
-      console.log('catch exec',error);
+      console.log('catch exec', error);
       break;
     }
   }

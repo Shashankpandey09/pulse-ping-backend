@@ -15,7 +15,9 @@ import { internalMonitor_routes } from "./routes/internalMonitors_routes";
 const app = express();
 dotenv.config();
 //creating redisClient
-const redisClient = createClient();
+const redisClient = createClient({
+  url: 'redis://my-redis:6379'
+});
 const userSocket = new Map();
 interface AuthSocket extends WebSocket {
   userID?: string;
@@ -65,7 +67,7 @@ async function startServer() {
     });
     //upgrading it to the websocket server
     const wss = new WebSocketServer({ server: httpServer });
- 
+
     wss.on("connection", (ws: AuthSocket) => {
       ws.on("error", (err) => console.error(err));
       ws.once("message", async (data) => {
@@ -74,28 +76,30 @@ async function startServer() {
         // console.log(token)
         try {
           console.log(process.env.CLERK_JWT_KEY)
-              const  result = await verifyToken(token, {
-          //@ts-ignore
-          issuer: process.env.CLERK_ISSUER!,
-          authorizedParties: [process.env.FRONTEND_API!],
-          jwtKey: process.env.CLERK_JWT_KEY,
-           skipJwksCache: true
-        });
+          const PUBLICK_JWT_KEY = process.env.CLERK_JWT_KEY?.replace(/\\n/g, '\n');
+          console.log('public key', PUBLICK_JWT_KEY)
+          const result = await verifyToken(token, {
             //@ts-ignore
-        const userID = result?.sub;
-   console.log('no err',result)
-        ws.userID = userID;
+            issuer: process.env.CLERK_ISSUER!,
+            authorizedParties: [process.env.FRONTEND_API!],
+            jwtKey: PUBLICK_JWT_KEY,
+            skipJwksCache: true
+          });
+          //@ts-ignore
+          const userID = result?.sub;
+          console.log('no err', result)
+          ws.userID = userID;
 
-        const existingSocket = userSocket.get(userID) || [];
-        existingSocket.push(ws);
-        userSocket.set(userID, existingSocket);
+          const existingSocket = userSocket.get(userID) || [];
+          existingSocket.push(ws);
+          userSocket.set(userID, existingSocket);
         } catch (error) {
-          console.log('hey')
+          console.log('hey', error)
           ws.close(4001, `error has occ-${error} `);
           return;
         }
 
-    
+
 
         ws.on("close", () => {
           const allSockets = userSocket.get(ws.userID) || [];
@@ -110,18 +114,18 @@ async function startServer() {
         });
       });
     });
-       //subscribing my Server to the channel Monitor update
+    //subscribing my Server to the channel Monitor update
     await redisClient.subscribe("monitor_update", (message) => {
       //writing socket code for realtime update for a specific user
       const payloadData = JSON.parse(message);
-      const data={
-        type:'monitor_with_history',
-        payload:payloadData
+      const data = {
+        type: 'monitor_with_history',
+        payload: payloadData
       }
       //getting sockets from ws object
       const sockets = userSocket.get(payloadData.userId);
-    
-    sockets &&sockets.forEach((ws: AuthSocket) => {
+
+      sockets && sockets.forEach((ws: AuthSocket) => {
         if (ws && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(data));
         }

@@ -43,7 +43,8 @@ function fetchMonitorsByIntervals(interval) {
                 const res = yield __await(axios_1.default.get(`${process.env.EXPRESS_APP_URL}/internal/monitors`, options));
                 const { monitors, nextCursor } = res.data;
                 if (!monitors || !Array.isArray(monitors) || monitors.length === 0) {
-                    console.error("❌ `monitors` is not an array. Response might be malformed Or length of monitor is 0");
+                    // console.error("❌ `monitors` is not an array. Response might be malformed Or length of monitor is 0");
+                    console.log('breaking');
                     break;
                 }
                 console.log(monitors, 'this is first monitor', nextCursor);
