@@ -1,0 +1,46 @@
+version: '3.8'
+services: 
+  express-app:
+    build: ./express-server
+    ports:
+      - "3000:3000"
+    container_name: express-container
+    env_file:
+      - ./express-server/.env 
+    restart: always
+    networks:
+      - my-network
+
+  cron-scheduler:
+    build: ./cron-Scheduler
+    container_name: cron-Container
+    depends_on: 
+      - express-app
+    env_file:
+      - ./cron-Scheduler/.env
+    restart: always
+    networks:
+      - my-network
+  
+  check-worker:
+    build: ./check-Worker
+    depends_on:
+      - express-app
+      - cron-scheduler
+    env_file:
+      - ./check-Worker/.env
+    restart: always    
+    networks:
+      - my-network
+
+  email-worker:
+    build: ./email-worker
+    depends_on:
+      - check-worker
+    env_file:
+      - ./email-worker/.env
+    restart: always
+    networks:
+      - my-network  
+
+
